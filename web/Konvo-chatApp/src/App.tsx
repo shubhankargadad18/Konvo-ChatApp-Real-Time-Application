@@ -1,10 +1,9 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useEffect, useState } from "react";
 import { useAuth } from "./store/auth";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Chat from "./pages/Chat";
-import { api } from "./api/client";
+import { verifyToken } from '../../../server/src/utils/jwt';
 
 export default function App() {
   const { token, logout } = useAuth();
@@ -16,8 +15,12 @@ export default function App() {
     async function fetchMe() {
       if (!token) return;
       try {
-        const { data } = await api.get("/users/me");
-        // set user in store if needed (kept simple here)
+        if(verifyToken(token)) {
+          setMode("chat");
+        } else {
+          logout();
+          setMode("login");
+        }
       } catch {
         logout();
         setMode("login");
